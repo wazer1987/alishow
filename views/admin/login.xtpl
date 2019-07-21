@@ -1,0 +1,65 @@
+{{extend ('./base')}}
+
+{{#block ('styles')}}
+  <link rel="stylesheet" href="../assets/css/admin.css">
+{{/block}}
+
+{{#block ('main')}}
+  <div class="login">
+    <form class="login-wrap">
+      <img class="avatar" src="../assets/img/default.png">
+      <!-- 有错误信息时展示 -->
+      <!-- <div class="alert alert-danger">
+        <strong>错误！</strong> 用户名或密码错误！
+      </div> -->
+      <div class="form-group">
+        <label for="email" class="sr-only">邮箱</label>
+        <input id="email" type="email" name="email" class="form-control" placeholder="邮箱" autofocus>
+      </div>
+      <div class="form-group">
+        <label for="password" class="sr-only">密码</label>
+        <input id="password" type="password" name="password" class="form-control" placeholder="密码">
+      </div>
+      <button class="btn btn-primary btn-block">登 录</button>
+    </form>
+  </div>
+{{/block}}
+
+{{#block ('scripts')}}
+  <script>
+    
+    // console.log($);
+
+    // 表单提交
+    $('form').on('submit', function () {
+      // alert(1);
+
+      // 通过 HTML5 提供的 FormData 可以方便的管理表单数据
+      // 但是存在一定的兼容风险。
+
+      // jQuery 中有一个方法 serialize 与 FormData 功能类似
+      // 与 FormData 一致，要求每个表单项必须要有 name 属性
+      var data = $(this).serialize();
+
+      // console.log(data);
+
+      $.ajax({
+        url: '/admin/login',
+        type: 'post',
+        data: data,
+        success: function (info) {
+          // console.log(info);
+          if(info.code == 10000) {
+            return location.href = '/admin';
+          }
+
+          alert(info.msg);
+        }
+      });
+
+      //  阻止表单的默认行为（即提交刷新）
+      return false;
+    })
+
+  </script>
+{{/block}}

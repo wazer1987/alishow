@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard &laquo; Admin</title>
+  <link rel="stylesheet" href="/assets/vendors/bootstrap/css/bootstrap.css">
+
+  {{{block ('styles')}}}
+</head>
+<body>
+  {{{block ('main')}}}
+
+  <script src="/assets/vendors/jquery/jquery.js"></script>
+  <script src="/assets/vendors/bootstrap/js/bootstrap.js"></script>
+
+  {{{block ('scripts')}}}
+</body>
+</html>

@@ -1,0 +1,115 @@
+{{extend ('./layout')}}
+
+{{#block ('body')}}
+  <div class="container-fluid">
+    <div class="page-title">
+      <h1>我的个人资料</h1>
+    </div>
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label class="col-sm-3 control-label">头像</label>
+        <div class="col-sm-6">
+          <label class="form-image">
+            <input id="avatar" type="file">
+            <input type="hidden" name="avatar" value="{{avatar}}">
+            {{#if (avatar)}}
+            <img class="preview" src="{{avatar}}">
+            {{else}}
+            <img class="preview" src="../assets/img/default.png">
+            {{/if}}
+            <i class="mask fa fa-upload"></i>
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email" class="col-sm-3 control-label">邮箱</label>
+        <div class="col-sm-6">
+          <input id="email" class="form-control" name="email" type="type" value="{{email}}" placeholder="邮箱" readonly>
+          <p class="help-block">登录邮箱不允许修改</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="slug" class="col-sm-3 control-label">别名</label>
+        <div class="col-sm-6">
+          <input id="slug" class="form-control" name="slug" type="type" value="{{slug}}" placeholder="slug">
+          <p class="help-block">https://zce.me/author/<strong>zce</strong></p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="nickname" class="col-sm-3 control-label">昵称</label>
+        <div class="col-sm-6">
+          <input id="nickname" class="form-control" name="nickname" type="type" value="{{nickname}}" placeholder="昵称">
+          <p class="help-block">限制在 2-16 个字符</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="bio" class="col-sm-3 control-label">简介</label>
+        <div class="col-sm-6">
+          <textarea id="bio" class="form-control" placeholder="Bio" cols="30" rows="6">{{bio}}</textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-6">
+          <button type="submit" class="btn btn-primary">更新</button>
+          <a class="btn btn-link" href="/admin/password">修改密码</a>
+        </div>
+      </div>
+    </form>
+  </div>
+{{/block}}
+
+{{#block ('scripts')}}
+<script>
+  // 当用户选择了某张图片后，发送请求至服务端
+  // 监听 input 的 change 事件，即：
+  $('#avatar').on('change', function () {
+
+    // this 代表当前的 input 元素，this.files 表示的是
+    // 选中的文件列表
+    // this.files[0] 即用户选择的某一个文件
+
+    // 通过 FormData 可以实现二进制数据的转换，即
+    var data = new FormData();
+    data.append('pic', this.files[0]);
+
+    // 发送请求
+    $.ajax({
+      url: '/admin/uploader',
+      type: 'post',
+      // data: this.files[0],
+      data: data,
+      // 如果使用 jQuery 的 ajax 发送请求并携带参数时
+      // 默认会对数据进行格式化处理，一般是 key=val&key1=val1
+      // 如果上传文件，不需要对二进制数据再次处理了
+      processData: false,
+      // 还会自动添加 Content-Type
+      contentType: false,
+      success: function (info) {
+        // console.log(info);
+        // 通过 img 来预览刚刚上传的图片
+        $('.preview').attr('src', '/' + info.path);
+        // 通过 input 将新的图片地址发送到服务端，存入数据库
+        $('input[name="avatar"]').val('/' + info.path);
+      }
+    });
+
+  })
+
+  // 监听表单的 submit 事件
+  $('form').on('submit', function () {
+    // 发送请求
+    $.ajax({
+      url: '/admin/profile/update',
+      type: 'post',
+      data: $(this).serialize(),
+      success: function (info) {
+        // console.log(info);
+        alert(info.msg);
+      }
+    });
+
+    // 阻止表单默认提交
+    return false;
+  })
+</script>
+{{/block}}

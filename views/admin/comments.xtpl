@@ -1,0 +1,101 @@
+{{extend ('./layout')}}
+
+{{#block ('body')}}
+  <div class="container-fluid">
+    <div class="page-title">
+      <h1>所有评论</h1>
+    </div>
+    <div class="page-action">
+      <ul class="pagination pagination-sm pull-right">
+        <li><a href="#">上一页</a></li>
+        <li><a href="#">1</a></li>
+        <li><a href="#">2</a></li>
+        <li><a href="#">3</a></li>
+        <li><a href="#">下一页</a></li>
+      </ul>
+    </div>
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th class="text-center" width="80">序号</th>
+          <th>作者</th>
+          <th>评论</th>
+          <th>评论在</th>
+          <th>提交于</th>
+          <th>状态</th>
+          <th class="text-center" width="120">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each (comments)}}
+        <tr>
+          <td class="text-center">{{xindex+1}}</td>
+          <td>{{this.author}}</td>
+          <td>{{this.content}}</td>
+          <td>{{this.title}}</td>
+          <td>{{this.created}}</td>
+          {{#if (this.status === 'approved')}}
+          <td>已批准</td>
+          {{elseif (this.status === 'held')}}
+          <td>待审核</td>
+          {{else}}
+          <td>已拒绝</td>
+          {{/if}}
+          <td data-id="{{this.id}}" data-status="{{this.status}}">
+            {{#if (this.status === 'approved')}}
+            <a href="javascript:;" class="btn btn-info btn-xs">驳回</a>
+            {{elseif (this.status === 'held')}}
+            <a href="javascript:;" class="btn btn-info btn-xs">批准</a>
+            {{else}}
+            <a href="javascript:;" disabled class="btn btn-warning btn-xs">撤销</a>
+            {{/if}}
+            <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+{{/block}}
+
+{{#block ('scripts')}}
+  <script>
+    // 监听按钮的点击事件，发送请求，对状态进行修改
+    $('.btn-info').on('click', function () {
+      var _this = $(this);
+      // 通过 dom 获取评论的id
+      var id = $(this).parent().attr('data-id');
+      // 获得评论的当前状态 approved/held
+      var status = $(this).parent().attr('data-status');
+
+      // 检测评论的状态
+      if(status == 'approved') {
+        status = 'held';
+      } else if(status == 'held') {
+        status = 'approved';
+      }
+
+      // 发送请求
+      $.ajax({
+        url: '/admin/comments/handle',
+        type: 'post',
+        data: {id: id, status: status},
+        success: function (info) {
+          // console.log(info);
+          if(info.code == 10000) {
+            if(status == 'approved') {
+              _this.text('驳回');
+              _this.parent().prev().text('已批准');
+            } else if(status == 'held') {
+              _this.text('批准');
+              _this.parent().prev().text('待审核');
+            }
+
+            // 修改评论对应的状态
+            _this.parent().attr('data-status', status);
+          }
+        }
+      })
+    })
+  </script>
+{{/block}}

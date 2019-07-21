@@ -1,0 +1,109 @@
+{{extend ('./layout')}}
+
+{{#block ('body')}}
+  <div class="container-fluid">
+    <div class="page-title">
+      <h1>写文章</h1>
+    </div>
+    <form class="row">
+      <div class="col-md-9">
+        <div class="form-group">
+          <label for="title">标题</label>
+          <input id="title" class="form-control input-lg" name="title" type="text" placeholder="文章标题">
+        </div>
+        <div class="form-group">
+          <label for="content">标题</label>
+          <textarea id="content" class="form-control input-lg" name="content" cols="30" rows="10" placeholder="内容"></textarea>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="form-group">
+          <label for="slug">别名</label>
+          <input id="slug" class="form-control" name="slug" type="text" placeholder="slug">
+          <p class="help-block">https://zce.me/post/<strong>slug</strong></p>
+        </div>
+        <div class="form-group">
+          <label for="feature">特色图像</label>
+          <!-- show when image chose -->
+          <input type="hidden" name="feature">
+          <img class="help-block thumbnail" style="display: none">
+          <input id="feature" class="form-control" type="file">
+        </div>
+        <div class="form-group">
+          <label for="category">所属分类</label>
+          <select id="category" class="form-control" name="category_id">
+            <option value="1">未分类</option>
+            <option value="2">潮生活</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="created">发布时间</label>
+          <input id="created" class="form-control" name="created" type="datetime-local">
+        </div>
+        <div class="form-group">
+          <label for="status">状态</label>
+          <select id="status" class="form-control" name="status">
+            <option value="drafted">草稿</option>
+            <option value="published">已发布</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" type="submit">保存</button>
+        </div>
+      </div>
+    </form>
+  </div>
+{{/block}}
+
+{{#block ('scripts')}}
+  <script>
+    // 1. 监听表单的 submit 事件，发送ajax请求，提交表单数据
+    $('form').on('submit', function () {
+
+      // 发送 ajax 请求
+      $.ajax({
+        url: '',
+        type: 'post',
+        data: $(this).serialize(),
+        success: function (info) {
+          // console.log(info);
+          if(info.code == 10000) {
+            location.href = '/admin/posts';
+          }
+        }
+      })
+
+      // 阻止表单默认提交
+      return false;
+    })
+
+    // 2. 监听 input 的 change 事件，异步将文件上传，然后实现预览
+    $('#feature').on('change', function () {
+
+      // this.files 为用户选择的待上传的文件信息，且为数组类型
+      // 只上传一个文件（图片）this.files[0]
+      var data = new FormData();
+      data.append('pic', this.files[0]);
+
+      // ajax 上传文件
+      $.ajax({
+        url: '/admin/uploader',
+        type: 'post',
+        data: data,
+        // processData 设置为 false
+        processData: false,
+        // contentType 设置国 false
+        contentType: false,
+        success: function (info) {
+          // console.log(info);
+
+          // 通过 img 标签对刚刚上传的图片进行预览
+          $('.thumbnail').attr('src', '/' + info.path).show();
+
+          // 通过 input 将刚刚上传的图片路径发送到后端，存入数据库
+          $('input[name="feature"]').val('/' + info.path);
+        }
+      })
+    })
+  </script>
+{{/block}}
